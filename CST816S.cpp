@@ -84,7 +84,7 @@ void CST816S::enable_double_click(void) {
             Time in seconds before entering standby mode.
 */
 void CST816S::enable_auto_standby(uint16_t seconds) {
-    byte standbyTime = min(seconds, 255); // Max value is 255 seconds
+    byte standbyTime = min(seconds, (uint16_t)255); // Cast 255 to uint16_t
     i2c_write(CST816S_ADDRESS, 0xF9, &standbyTime, 1);
 }
 
