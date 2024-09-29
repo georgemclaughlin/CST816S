@@ -9,8 +9,8 @@
 
  | Register Name     | Address | Bit Description                                       | Default Value | Configuration Options                                          |
 |-------------------|---------|-------------------------------------------------------|---------------|----------------------------------------------------------------|
-| GestureID         | 0x01    | Gesture code for detected gestures                    | N/A           | 0x00: None, 0x01: Slide Up, 0x02: Slide Down, 0x0B: Double Click |
-| FingerNum         | 0x02    | Number of fingers detected                            | N/A           | 0: No finger, 1: One finger                                    |
+| GestureID         | 0x01    | Gesture code for detected gestures                    | N/A           | - 0x00: None  <br> - 0x01: Slide Up  <br> - 0x02: Slide Down  <br> - 0x03: Slide Left  <br> - 0x04: Slide Right  <br> - 0x05: Single Click  <br> - 0x0B: Double Click  <br> - 0x0C: Long Press |
+| FingerNum         | 0x02    | Number of fingers detected                            | N/A           | - 0: No finger <br> - 1: One finger                            |
 | XposH             | 0x03    | High 4 bits of X coordinate                           | N/A           | -                                                              |
 | XposL             | 0x04    | Low 8 bits of X coordinate                            | N/A           | -                                                              |
 | YposH             | 0x05    | High 4 bits of Y coordinate                           | N/A           | -                                                              |
@@ -22,22 +22,23 @@
 | ChipID            | 0xA7    | Chip model identifier                                 | N/A           | -                                                              |
 | ProjID            | 0xA8    | Project number                                        | N/A           | -                                                              |
 | FwVersion         | 0xA9    | Firmware version number                               | N/A           | -                                                              |
-| MotionMask        | 0xEC    | Enable gesture actions like double-click              | 0x00          | Bit 0: EnDClick (enable double-click), Bit 1: EnConUD          |
+| MotionMask        | 0xEC    | Enable continuous gesture actions and double-click    | 0x00          | - Bit 0: EnDClick (enable double-click) <br> - Bit 1: EnConUD (enable continuous up/down swipe) <br> - Bit 2: EnConLR (enable continuous left/right swipe) |
 | IrqPluseWidth     | 0xED    | Interrupt pulse width (0.1 ms units)                  | 10            | 1-200                                                          |
 | NorScanPer        | 0xEE    | Normal scan period (10 ms units)                      | 1             | 1-30                                                           |
-| MotionSlAngle     | 0xEF    | Gesture detection sliding angle control               | N/A           | -                                                              |
-| LpScanRaw1H       | 0xF0    | High 8 bits of low-power scan channel 1 reference     | N/A           | -                                                              |
-| LpScanRaw1L       | 0xF1    | Low 8 bits of low-power scan channel 1 reference      | N/A           | -                                                              |
-| LpScanRaw2H       | 0xF2    | High 8 bits of low-power scan channel 2 reference     | N/A           | -                                                              |
-| LpScanRaw2L       | 0xF3    | Low 8 bits of low-power scan channel 2 reference      | N/A           | -                                                              |
-| LpAutoWakeTime    | 0xF4    | Auto recalibration time in low-power mode             | 5 minutes     | 1-5 minutes                                                    |
-| LpScanTH          | 0xF5    | Low-power scan wake threshold                         | 48            | 1-255                                                          |
-| LpScanWin         | 0xF6    | Low-power scan range                                  | 3             | 0-3                                                            |
-| LpScanFreq        | 0xF7    | Low-power scan frequency                              | 7             | 1-255                                                          |
-| LpScanIdac        | 0xF8    | Low-power scan current                                | N/A           | 1-255                                                          |
-| AutoSleepTime     | 0xF9    | Time in seconds before entering standby mode          | 2 seconds     | 1-255 seconds                                                  |
-| IrqCtl            | 0xFA    | Control of interrupt behavior                         | N/A           | EnTest, EnTouch, EnChange, EnMotion                            |
-| AutoReset         | 0xFB    | Auto-reset time with no valid gesture detected        | 5 seconds     | 0-5 seconds (0 to disable)                                     |
-| LongPressTime     | 0xFC    | Time for long press to trigger reset                  | 10 seconds    | 0-10 seconds (0 to disable)                                    |
-| IOCtl             | 0xFD    | IO control settings including soft reset              | N/A           | SOFT_RST, IIC_OD, En1v8                                        |
-| DisAutoSleep      | 0xFE    | Disable auto sleep mode                               | 0             | Non-zero value disables auto sleep mode                        |
+| MotionSlAngle     | 0xEF    | Gesture detection sliding angle control (Angle = tan(c) * 10, where c is the angle relative to the positive X-axis) | N/A           | - |
+| LpScanRaw1H       | 0xF0    | High 8 bits of low-power scan channel 1 reference      | N/A           | -                                                              |
+| LpScanRaw1L       | 0xF1    | Low 8 bits of low-power scan channel 1 reference       | N/A           | -                                                              |
+| LpScanRaw2H       | 0xF2    | High 8 bits of low-power scan channel 2 reference      | N/A           | -                                                              |
+| LpScanRaw2L       | 0xF3    | Low 8 bits of low-power scan channel 2 reference       | N/A           | -                                                              |
+| LpAutoWakeTime    | 0xF4    | Low-power mode auto recalibration interval (in minutes) | 5 minutes     | 1-5 minutes                                                    |
+| LpScanTH          | 0xF5    | Low-power scan wake threshold. The smaller the value, the more sensitive it is. | 48            | 1-255                                                          |
+| LpScanWin         | 0xF6    | Low-power scan range. The larger the value, the more sensitive it is, but power consumption increases. | 3             | 0-3                                                            |
+| LpScanFreq        | 0xF7    | Low-power scan frequency. The smaller the value, the more sensitive it is. | 7             | 1-255                                                          |
+| LpScanIdac        | 0xF8    | Low-power scan current. The smaller the value, the more sensitive it is. | N/A           | 1-255                                                          |
+| AutoSleepTime     | 0xF9    | Time in seconds before entering standby mode after inactivity | 2 seconds     | 1-255 seconds                                                  |
+| IrqCtl            | 0xFA    | Control of interrupt behavior                         | N/A           | - Bit 7: EnTest (Enable test, periodically sends low pulses) <br> - Bit 6: EnTouch (Sends low pulse on touch detection) <br> - Bit 5: EnChange (Sends low pulse on touch state change) <br> - Bit 4: EnMotion (Sends low pulse on gesture detection) <br> - Bit 0: OnceWLP (Sends one low pulse on long press) |
+| AutoReset         | 0xFB    | Auto-reset time after detecting touch with no valid gesture | 5 seconds     | - 0: Disable <br> - 1-5: Time in seconds before auto-reset      |
+| LongPressTime     | 0xFC    | Time (in seconds) for a long press to trigger reset    | 10 seconds    | - 0: Disable <br> - 1-10: Long press duration in seconds         |
+| IOCtl             | 0xFD    | IO control settings including soft reset and power options | N/A           | - Bit 2: SOFT_RST (0: Disable soft reset, 1: Enable soft reset) <br> - Bit 1: IIC_OD (0: Pull-up resistor, 1: Open-drain) <br> - Bit 0: En1v8 (0: VDD, 1: 1.8V) |
+| DisAutoSleep      | 0xFE    | Disable automatic entry into low-power mode            | 0 (enabled)   | - 0: Enable auto sleep <br> - Non-zero: Disable auto sleep       |
+

@@ -5,7 +5,7 @@ CST816S touch(21, 22, 5, 4);  // sda, scl, rst, irq
 void setup() {
   Serial.begin(115200);
   touch.begin();
-  touch.enable_auto_standby(5000); // Set auto standby mode to 5000 milliseconds (5 seconds)
+  touch.enable_auto_standby(5); // Set auto standby mode to 5 seconds
   Serial.println("Auto standby enabled for 5 seconds of inactivity.");
 }
 

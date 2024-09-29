@@ -80,13 +80,14 @@ void CST816S::enable_double_click(void) {
 
 /*!
     @brief  Enable auto standby mode with a specified delay.
-    @param  milliseconds
-            Time in milliseconds before entering standby mode.
+    @param  seconds
+            Time in seconds before entering standby mode.
 */
-void CST816S::enable_auto_standby(uint16_t milliseconds) {
-    byte standbyTime = min(milliseconds / 1000, 255); // Convert milliseconds to seconds, max value 255
+void CST816S::enable_auto_standby(uint16_t seconds) {
+    byte standbyTime = min(seconds, 255); // Max value is 255 seconds
     i2c_write(CST816S_ADDRESS, 0xF9, &standbyTime, 1);
 }
+
 
 /*!
     @brief  initialize the touch screen
