@@ -3,6 +3,22 @@
  
  [![arduino-library-badge](https://www.ardu-badge.com/badge/CST816S.svg?)](https://www.arduinolibraries.info/libraries/cst816-s)
 
+## Auto Sleep Control
+
+Auto Sleep is referred to as Standby Mode in this [Waveshare document](https://www.waveshare.com/w/upload/5/51/CST816S_Datasheet_EN.pdf). Disabling of auto sleep or auto standby will keep the touch display in Dynamic mode. This will improve responsiveness, at the cost of about ~1.6mA.
+
+By default, auto sleep is **enabled** with a timeout of 2 seconds. The following functions allow you to manage auto sleep behavior:
+
+- **`void disable_auto_sleep();`**  
+  Disables auto sleep, keeping the device active indefinitely.
+
+- **`void enable_auto_sleep();`**  
+  Re-enables auto sleep with the current timeout (default is 2 seconds).
+
+- **`void set_auto_sleep_time(int seconds);`**  
+  Sets the auto sleep timeout in seconds (1-255).  
+  Example: `set_auto_sleep_time(10);` sets a 10-second timeout.
+
  ## Register Information
 
  The following information was extracted from [this document](https://www.waveshare.com/w/upload/c/c2/CST816S_register_declaration.pdf) provided by Waveshare.
