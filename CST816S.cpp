@@ -142,7 +142,7 @@ void CST816S::begin(int interrupt)
   attachInterrupt(_irq, std::bind(&CST816S::handleISR, this), interrupt);
 }
 
-void CST816S::add_custom_interrupt(std::function<void(void)> handler)
+void CST816S::add_custom_interrupt(int interrupt, std::function<void(void)> handler)
 {
   attachInterrupt(digitalPinToInterrupt(_irq), handler, interrupt);
 }
