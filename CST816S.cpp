@@ -28,30 +28,30 @@
 
 #include "CST816S.h"
 
-
 /*!
     @brief  Constructor for CST816S
-	@param	sda
-			i2c data pin
-	@param	scl
-			i2c clock pin
-	@param	rst
-			touch reset pin
-	@param	irq
-			touch interrupt pin
+  @param	sda
+      i2c data pin
+  @param	scl
+      i2c clock pin
+  @param	rst
+      touch reset pin
+  @param	irq
+      touch interrupt pin
 */
-CST816S::CST816S(int sda, int scl, int rst, int irq) {
+CST816S::CST816S(int sda, int scl, int rst, int irq)
+{
   _sda = sda;
   _scl = scl;
   _rst = rst;
   _irq = irq;
-
 }
 
 /*!
     @brief  read touch data
 */
-void CST816S::read_touch() {
+void CST816S::read_touch()
+{
   byte data_raw[8];
   i2c_read(CST816S_ADDRESS, 0x01, data_raw, 6);
 
@@ -65,15 +65,16 @@ void CST816S::read_touch() {
 /*!
     @brief  handle interrupts
 */
-void IRAM_ATTR CST816S::handleISR(void) {
+void IRAM_ATTR CST816S::handleISR(void)
+{
   _event_available = true;
-
 }
 
 /*!
     @brief  enable double click
 */
-void CST816S::enable_double_click(void) {
+void CST816S::enable_double_click(void)
+{
   byte enableDoubleTap = 0x01; // Set EnDClick (bit 0) to enable double-tap
   i2c_write(CST816S_ADDRESS, 0xEC, &enableDoubleTap, 1);
 }
@@ -81,7 +82,8 @@ void CST816S::enable_double_click(void) {
 /*!
     @brief  Disable auto sleep mode
 */
-void CST816S::disable_auto_sleep(void) {
+void CST816S::disable_auto_sleep(void)
+{
   byte disableAutoSleep = 0xFE; // Non-zero value disables auto sleep
   i2c_write(CST816S_ADDRESS, 0xFE, &disableAutoSleep, 1);
 }
@@ -89,7 +91,8 @@ void CST816S::disable_auto_sleep(void) {
 /*!
     @brief  Enable auto sleep mode
 */
-void CST816S::enable_auto_sleep(void) {
+void CST816S::enable_auto_sleep(void)
+{
   byte enableAutoSleep = 0x00; // 0 value enables auto sleep
   i2c_write(CST816S_ADDRESS, 0xFE, &enableAutoSleep, 1);
 }
@@ -98,26 +101,31 @@ void CST816S::enable_auto_sleep(void) {
     @brief  Set the auto sleep time
     @param  seconds Time in seconds (1-255) before entering standby mode after inactivity
 */
-void CST816S::set_auto_sleep_time(int seconds) {
-  if (seconds < 1) {
-    seconds = 1;   // Enforce minimum value of 1 second
-  } else if (seconds > 255) {
+void CST816S::set_auto_sleep_time(int seconds)
+{
+  if (seconds < 1)
+  {
+    seconds = 1; // Enforce minimum value of 1 second
+  }
+  else if (seconds > 255)
+  {
     seconds = 255; // Enforce maximum value of 255 seconds
   }
-  
+
   byte sleepTime = static_cast<byte>(seconds); // Convert int to byte
   i2c_write(CST816S_ADDRESS, 0xF9, &sleepTime, 1);
 }
 
 /*!
     @brief  initialize the touch screen
-    @param  interrupt Type of interrupt: FALLING, RISING, etc.
-    @param  handler User-provided interrupt handler (optional)
+  @param	interrupt
+      type of interrupt FALLING, RISING..
 */
-void CST816S::begin(int interrupt, std::function<void(void)> handler) {
+void CST816S::begin(int interrupt)
+{
   Wire.begin(_sda, _scl);
 
-  pinMode(_irq, INPUT_PULLUP);  // Ensure the pin is not floating
+  pinMode(_irq, INPUT_PULLUP);
   pinMode(_rst, OUTPUT);
 
   digitalWrite(_rst, HIGH);
@@ -131,23 +139,21 @@ void CST816S::begin(int interrupt, std::function<void(void)> handler) {
   delay(5);
   i2c_read(CST816S_ADDRESS, 0xA7, data.versionInfo, 3);
 
-  // Set the user-provided handler if available, else use the default handler
-  if (handler) {
-    userISR = handler;
-  } else {
-    userISR = std::bind(&CST816S::handleISR, this);
-  }
-
-  // Attach the interrupt with the chosen handler
-  attachInterrupt(digitalPinToInterrupt(_irq), userISR, interrupt);
+  attachInterrupt(_irq, std::bind(&CST816S::handleISR, this), interrupt);
 }
 
+void CST816S::add_custom_interrupt(std::function<void(void)> handler)
+{
+  attachInterrupt(digitalPinToInterrupt(_irq), handler, interrupt);
+}
 
 /*!
     @brief  check for a touch event
 */
-bool CST816S::available() {
-  if (_event_available) {
+bool CST816S::available()
+{
+  if (_event_available)
+  {
     read_touch();
     _event_available = false;
     return true;
@@ -158,10 +164,11 @@ bool CST816S::available() {
 /*!
     @brief  put the touch screen in standby mode
 */
-void CST816S::sleep() {
+void CST816S::sleep()
+{
   digitalWrite(_rst, LOW);
   delay(5);
-  digitalWrite(_rst, HIGH );
+  digitalWrite(_rst, HIGH);
   delay(50);
   byte standby_value = 0x03;
   i2c_write(CST816S_ADDRESS, 0xA5, &standby_value, 1);
@@ -170,56 +177,60 @@ void CST816S::sleep() {
 /*!
     @brief  get the gesture event name
 */
-String CST816S::gesture() {
-  switch (data.gestureID) {
-    case NONE:
-      return "NONE";
-      break;
-    case SWIPE_DOWN:
-      return "SWIPE DOWN";
-      break;
-    case SWIPE_UP:
-      return "SWIPE UP";
-      break;
-    case SWIPE_LEFT:
-      return "SWIPE LEFT";
-      break;
-    case SWIPE_RIGHT:
-      return "SWIPE RIGHT";
-      break;
-    case SINGLE_CLICK:
-      return "SINGLE CLICK";
-      break;
-    case DOUBLE_CLICK:
-      return "DOUBLE CLICK";
-      break;
-    case LONG_PRESS:
-      return "LONG PRESS";
-      break;
-    default:
-      return "UNKNOWN";
-      break;
+String CST816S::gesture()
+{
+  switch (data.gestureID)
+  {
+  case NONE:
+    return "NONE";
+    break;
+  case SWIPE_DOWN:
+    return "SWIPE DOWN";
+    break;
+  case SWIPE_UP:
+    return "SWIPE UP";
+    break;
+  case SWIPE_LEFT:
+    return "SWIPE LEFT";
+    break;
+  case SWIPE_RIGHT:
+    return "SWIPE RIGHT";
+    break;
+  case SINGLE_CLICK:
+    return "SINGLE CLICK";
+    break;
+  case DOUBLE_CLICK:
+    return "DOUBLE CLICK";
+    break;
+  case LONG_PRESS:
+    return "LONG PRESS";
+    break;
+  default:
+    return "UNKNOWN";
+    break;
   }
 }
 
 /*!
     @brief  read data from i2c
-	@param	addr
-			i2c device address
-	@param	reg_addr
-			device register address
-	@param	reg_data
-			array to copy the read data
-	@param	length
-			length of data
+  @param	addr
+      i2c device address
+  @param	reg_addr
+      device register address
+  @param	reg_data
+      array to copy the read data
+  @param	length
+      length of data
 */
 uint8_t CST816S::i2c_read(uint16_t addr, uint8_t reg_addr, uint8_t *reg_data, size_t length)
 {
   Wire.beginTransmission(addr);
   Wire.write(reg_addr);
-  if ( Wire.endTransmission(true))return -1;
+  if (Wire.endTransmission(true))
+    return -1;
   Wire.requestFrom(addr, length, true);
-  for (int i = 0; i < length; i++) {
+  for (int i = 0; i < length; i++)
+  {
     *reg_data++ = Wire.read();
   }
   return 0;
@@ -227,23 +238,25 @@ uint8_t CST816S::i2c_read(uint16_t addr, uint8_t reg_addr, uint8_t *reg_data, si
 
 /*!
     @brief  write data to i2c
-	@brief  read data from i2c
-	@param	addr
-			i2c device address
-	@param	reg_addr
-			device register address
-	@param	reg_data
-			data to be sent
-	@param	length
-			length of data
+  @brief  read data from i2c
+  @param	addr
+      i2c device address
+  @param	reg_addr
+      device register address
+  @param	reg_data
+      data to be sent
+  @param	length
+      length of data
 */
 uint8_t CST816S::i2c_write(uint8_t addr, uint8_t reg_addr, const uint8_t *reg_data, size_t length)
 {
   Wire.beginTransmission(addr);
   Wire.write(reg_addr);
-  for (int i = 0; i < length; i++) {
+  for (int i = 0; i < length; i++)
+  {
     Wire.write(*reg_data++);
   }
-  if ( Wire.endTransmission(true))return -1;
+  if (Wire.endTransmission(true))
+    return -1;
   return 0;
 }

@@ -57,7 +57,8 @@ class CST816S {
 
   public:
     CST816S(int sda, int scl, int rst, int irq);
-    void begin(int interrupt = RISING, std::function<void(void)> handler = nullptr);
+    void begin(int interrupt = RISING);
+    void add_custom_interrupt(std::function<void(void)> handler = nullptr);
     void enable_double_click();
     void disable_auto_sleep();
     void enable_auto_sleep();
