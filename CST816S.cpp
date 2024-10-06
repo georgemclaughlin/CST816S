@@ -94,7 +94,6 @@ void CST816S::enable_auto_sleep(void) {
   i2c_write(CST816S_ADDRESS, 0xFE, &enableAutoSleep, 1);
 }
 
-
 /*!
     @brief  Set the auto sleep time
     @param  seconds Time in seconds (1-255) before entering standby mode after inactivity
@@ -110,32 +109,39 @@ void CST816S::set_auto_sleep_time(int seconds) {
   i2c_write(CST816S_ADDRESS, 0xF9, &sleepTime, 1);
 }
 
-
-
 /*!
     @brief  initialize the touch screen
-	@param	interrupt
-			type of interrupt FALLING, RISING..
+    @param  interrupt Type of interrupt: FALLING, RISING, etc.
+    @param  handler User-provided interrupt handler (optional)
 */
-void CST816S::begin(int interrupt) {
+void CST816S::begin(int interrupt, std::function<void(void)> handler) {
   Wire.begin(_sda, _scl);
 
-  pinMode(_irq, INPUT);
+  pinMode(_irq, INPUT_PULLUP);  // Ensure the pin is not floating
   pinMode(_rst, OUTPUT);
 
-  digitalWrite(_rst, HIGH );
+  digitalWrite(_rst, HIGH);
   delay(50);
   digitalWrite(_rst, LOW);
   delay(5);
-  digitalWrite(_rst, HIGH );
+  digitalWrite(_rst, HIGH);
   delay(50);
 
   i2c_read(CST816S_ADDRESS, 0x15, &data.version, 1);
   delay(5);
   i2c_read(CST816S_ADDRESS, 0xA7, data.versionInfo, 3);
 
-  attachInterrupt(_irq, std::bind(&CST816S::handleISR, this), interrupt);
+  // Set the user-provided handler if available, else use the default handler
+  if (handler) {
+    userISR = handler;
+  } else {
+    userISR = std::bind(&CST816S::handleISR, this);
+  }
+
+  // Attach the interrupt with the chosen handler
+  attachInterrupt(digitalPinToInterrupt(_irq), userISR, interrupt);
 }
+
 
 /*!
     @brief  check for a touch event

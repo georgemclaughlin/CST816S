@@ -57,7 +57,7 @@ class CST816S {
 
   public:
     CST816S(int sda, int scl, int rst, int irq);
-    void begin(int interrupt = RISING);
+    void begin(int interrupt = RISING, std::function<void(void)> handler = nullptr);
     void enable_double_click();
     void disable_auto_sleep();
     void enable_auto_sleep();
@@ -74,6 +74,8 @@ class CST816S {
     int _rst;
     int _irq;
     bool _event_available;
+    std::function<void(void)> userISR;
+
 
     void IRAM_ATTR handleISR();
     void read_touch();
