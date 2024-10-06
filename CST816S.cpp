@@ -79,14 +79,37 @@ void CST816S::enable_double_click(void) {
 }
 
 /*!
-    @brief  Enable auto standby mode with a specified delay.
-    @param  seconds
-            Time in seconds before entering standby mode.
+    @brief  Disable auto sleep mode
 */
-void CST816S::enable_auto_standby(uint16_t seconds) {
-    byte standbyTime = min(seconds, (uint16_t)255); // Cast 255 to uint16_t
-    i2c_write(CST816S_ADDRESS, 0xF9, &standbyTime, 1);
+void CST816S::disable_auto_sleep(void) {
+  byte disableAutoSleep = 0xFE; // Non-zero value disables auto sleep
+  i2c_write(CST816S_ADDRESS, 0xFE, &disableAutoSleep, 1);
 }
+
+/*!
+    @brief  Enable auto sleep mode
+*/
+void CST816S::enable_auto_sleep(void) {
+  byte enableAutoSleep = 0x00; // 0 value enables auto sleep
+  i2c_write(CST816S_ADDRESS, 0xFE, &enableAutoSleep, 1);
+}
+
+
+/*!
+    @brief  Set the auto sleep time
+    @param  seconds Time in seconds (1-255) before entering standby mode after inactivity
+*/
+void CST816S::set_auto_sleep_time(int seconds) {
+  if (seconds < 1) {
+    seconds = 1;   // Enforce minimum value of 1 second
+  } else if (seconds > 255) {
+    seconds = 255; // Enforce maximum value of 255 seconds
+  }
+  
+  byte sleepTime = static_cast<byte>(seconds); // Convert int to byte
+  i2c_write(CST816S_ADDRESS, 0xF9, &sleepTime, 1);
+}
+
 
 
 /*!
