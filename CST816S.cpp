@@ -68,7 +68,13 @@ void CST816S::read_touch()
 void IRAM_ATTR CST816S::handleISR(void)
 {
   _event_available = true;
+
+  // Call user callback if it has been set
+  if (userISR != nullptr) {
+      userISR();
+  }
 }
+
 
 /*!
     @brief  enable double click
@@ -142,10 +148,11 @@ void CST816S::begin(int interrupt)
   attachInterrupt(_irq, std::bind(&CST816S::handleISR, this), interrupt);
 }
 
-void CST816S::add_custom_interrupt(int interrupt, std::function<void(void)> handler)
+void CST816S::attachUserInterrupt(std::function<void(void)> callback)
 {
-  attachInterrupt(digitalPinToInterrupt(_irq), handler, interrupt);
+  userISR = callback;
 }
+
 
 /*!
     @brief  check for a touch event
