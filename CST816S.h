@@ -58,7 +58,8 @@ class CST816S {
   public:
     CST816S(int sda, int scl, int rst, int irq);
     void begin(int interrupt = RISING);
-    void enable_double_click();
+    void enable_double_click();          //!< @brief Enable double-tap gesture
+    void enable_double_click_interrupt_only();  //!< @brief Only wake on double-tap, disable all other IRQs
     void disable_auto_sleep();
     void enable_auto_sleep();
     void set_auto_sleep_time(int seconds);

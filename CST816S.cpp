@@ -86,6 +86,21 @@ void CST816S::enable_double_click(void)
 }
 
 /*!
+    @brief  Only enable double-tap interrupt (disable all other IRQ sources)
+*/
+void CST816S::enable_double_click_interrupt_only(void)
+{
+    // 1) Only enable double-tap in MotionMask (0xEC: EnDClick = bit0)
+    uint8_t motion_mask = 0x01;          // bit0 = EnDClick, all others = 0
+    i2c_write(CST816S_ADDRESS, 0xEC, &motion_mask, 1);
+
+    // 2) Configure IrqCtl (0xFA) to only raise IRQ on EnMotion (bit4),
+    //    clearing EnTouch/EnChange/OnceWLP bits
+    uint8_t irq_ctl = 0x10;              // bit4 = EnMotion, bits[7:5,3:0] = 0
+    i2c_write(CST816S_ADDRESS, 0xFA, &irq_ctl, 1);
+}
+
+/*!
     @brief  Disable auto sleep mode
 */
 void CST816S::disable_auto_sleep(void)
