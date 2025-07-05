@@ -28,6 +28,26 @@ The CST816S library allows you to attach a custom interrupt function to handle t
 - **Power Management**: Ideal for applications needing to manage power, such as waking from sleep modes, as the interrupt triggers only on touch.
 - **Gesture-Based Logic**: Use the interrupt to wake, then analyze gestures to decide on further actions, enabling efficient and gesture-responsive behavior.
 
+## Gesture-Based Wakeup / Selective Interrupt Masking
+
+By default the CST816S will generate an IRQ on _any_ enabled touch gesture, which is perfect for most applications. However for ultra–low-power scenarios you may only want to wake your MCU on a **single** gesture (e.g. a double-tap) and ignore swipes, single taps, long-presses, etc.  
+
+This library now provides two low-level register-writing methods plus a convenient helper, so you can:
+
+- **`set_motion_mask(uint8_t mask)`**  
+  Write directly to the **MotionMask** register (0xEC) to choose which gestures are tracked (bit 0 = EnDClick, bit 1 = EnConUD, bit 2 = EnConLR, …).
+
+- **`set_irq_control(uint8_t mask)`**  
+  Write directly to the **IrqCtl** register (0xFA) to select which events actually pull IRQ low (bit 4 = EnMotion, bit 6 = EnTouch, etc.).
+
+- **`enable_double_click_interrupt_only()`**  
+  Helper that sets **MotionMask** to `0x01` (only double-click enabled) and **IrqCtl** to `0x10` (only motion IRQ), so _only_ a double-tap will wake your MCU.
+
+**Typical usage**  
+1. Before entering light-sleep, call `enable_double_click_interrupt_only()`.  
+2. Configure your MCU to wake on the CST816S IRQ pin.  
+3. Upon wake, re-initialize or restore your normal masks (e.g. call `begin()` again) so that all gestures work as before.  
+
 
 
  ## Register Information
