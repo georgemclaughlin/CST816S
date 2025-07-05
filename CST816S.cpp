@@ -86,8 +86,19 @@ void CST816S::enable_double_click(void)
 }
 
 /*!
-    @brief  Directly write the MotionMask register (0xEC).
-    @param  mask  Bits to program into MotionMask (EnDClick, EnSwipe, etc.)
+  @brief Configure which gestures the CST816S will scan for.
+
+  The MotionMask register (0xEC) lets you enable or disable gesture detection
+  at the source.  Each bit turns on one gesture:
+
+    • bit0 = EnDClick   → double-tap  
+    • bit1 = EnClick    → single tap  
+    • bit2 = EnLong     → long-press  
+    • bit3 = EnSW       → swipe (all directions)  
+    • bits4–7 = reserved  
+
+  @param mask  A bitmask made by OR’ing together any of these flags.  
+               e.g. `(1<<0) | (1<<2)` to only detect double-taps and long-presses.
 */
 void CST816S::set_motion_mask(uint8_t mask)
 {
@@ -95,13 +106,32 @@ void CST816S::set_motion_mask(uint8_t mask)
 }
 
 /*!
-    @brief  Directly write the IrqCtl register (0xFA).
-    @param  mask  Bits to program into IrqCtl (EnMotion, EnTouch, etc.)
+  @brief Control which events will actually trigger the IRQ line.
+
+  The IrqCtl register (0xFA) lets you decide which enabled motion events
+  raise the interrupt, and which do not:
+
+    • bit4 = EnMotion   → interrupt on any enabled motion bit  
+    • bit3 = OnceWLP    → one-shot wake on long-press  
+    • bit2 = EnChange   → interrupt on X/Y coordinate change  
+    • bit1 = EnTouch    → interrupt on touch down/up  
+    • bit0 = reserved  
+
+  For example, to only get an interrupt when a double-tap occurs (assuming
+  you’ve already enabled EnDClick in the MotionMask), you would:
+
+    ```cpp
+    touch.set_motion_mask(1<<0);        // only EnDClick
+    touch.set_irq_control(1<<4);        // only wake on motion
+    ```
+
+  @param mask  A bitmask of IrqCtl flags. Combine bits as needed.
 */
 void CST816S::set_irq_control(uint8_t mask)
 {
   i2c_write(CST816S_ADDRESS, 0xFA, &mask, 1);
 }
+
 
 /*!
     @brief  Only enable double-tap interrupt (disable all other IRQ sources)
