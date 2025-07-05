@@ -19,6 +19,17 @@ By default, auto sleep is **enabled** with a timeout of 2 seconds. The following
   Sets the auto sleep timeout in seconds (1-255).  
   Example: `set_auto_sleep_time(10);` sets a 10-second timeout.
 
+## User-Provided Interrupt
+
+The CST816S library allows you to attach a custom interrupt function to handle touch events according to your application's needs. By providing a user-defined interrupt, you can trigger specific actions upon touch events, such as waking the device from a low-power state, checking gestures, or executing custom logic without constantly polling the device.
+
+**Feature Highlights:**
+- **Custom Event Handling**: Define and attach a user function that executes on each touch interrupt, allowing immediate responses to touch events.
+- **Power Management**: Ideal for applications needing to manage power, such as waking from sleep modes, as the interrupt triggers only on touch.
+- **Gesture-Based Logic**: Use the interrupt to wake, then analyze gestures to decide on further actions, enabling efficient and gesture-responsive behavior.
+
+
+
  ## Register Information
 
  The following information was extracted from [this document](https://www.waveshare.com/w/upload/c/c2/CST816S_register_declaration.pdf) provided by Waveshare.
@@ -57,4 +68,3 @@ By default, auto sleep is **enabled** with a timeout of 2 seconds. The following
 | LongPressTime     | 0xFC    | Time (in seconds) for a long press to trigger reset    | 10 seconds    | - 0: Disable <br> - 1-10: Long press duration in seconds         |
 | IOCtl             | 0xFD    | IO control settings including soft reset and power options | N/A           | - Bit 2: SOFT_RST (0: Disable soft reset, 1: Enable soft reset) <br> - Bit 1: IIC_OD (0: Pull-up resistor, 1: Open-drain) <br> - Bit 0: En1v8 (0: VDD, 1: 1.8V) |
 | DisAutoSleep      | 0xFE    | Disable automatic entry into low-power mode            | 0 (enabled)   | - 0: Enable auto sleep <br> - Non-zero: Disable auto sleep       |
-

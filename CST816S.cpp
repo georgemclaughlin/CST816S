@@ -155,6 +155,15 @@ void CST816S::attachUserInterrupt(std::function<void(void)> callback)
 
 
 /*!
+    @brief  Attaches a user-defined callback function to be triggered on an interrupt event from the CST816S touch controller.
+    @param  callback  A function to be called when an interrupt event occurs, must have no parameters and return void.
+*/
+void CST816S::attachUserInterrupt(std::function<void(void)> callback)
+{
+  userISR = callback;
+}
+
+/*!
     @brief  check for a touch event
 */
 bool CST816S::available()
