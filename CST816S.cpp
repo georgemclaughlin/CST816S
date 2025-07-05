@@ -65,7 +65,7 @@ void CST816S::read_touch()
 /*!
     @brief  handle interrupts
 */
-void IRAM_ATTR CST816S::handleISR(void)
+void CST816S::handleISR(void)
 {
   _event_available = true;
 
