@@ -58,8 +58,12 @@ class CST816S {
   public:
     CST816S(int sda, int scl, int rst, int irq);
     void begin(int interrupt = RISING);
-    void enable_double_click();          //!< @brief Enable double-tap gesture
-    void enable_double_click_interrupt_only();  //!< @brief Only wake on double-tap, disable all other IRQs
+    void enable_double_click();              //!< @brief Enable double-tap gesture detection
+    void enable_double_click_interrupt_only(); //!< @brief Wrapper: set motion mask & irq control for double-tap only
+    /** @brief Directly program the MotionMask register (0xEC). */
+    void set_motion_mask(uint8_t mask);
+    /** @brief Directly program the IrqCtl register (0xFA). */
+    void set_irq_control(uint8_t mask);
     void disable_auto_sleep();
     void enable_auto_sleep();
     void set_auto_sleep_time(int seconds);

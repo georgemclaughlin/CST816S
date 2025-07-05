@@ -81,8 +81,26 @@ void IRAM_ATTR CST816S::handleISR(void)
 */
 void CST816S::enable_double_click(void)
 {
-  byte enableDoubleTap = 0x01; // Set EnDClick (bit 0) to enable double-tap
+  byte enableDoubleTap = 0x01; // Set EnDClick (bit0) to enable double-tap
   i2c_write(CST816S_ADDRESS, 0xEC, &enableDoubleTap, 1);
+}
+
+/*!
+    @brief  Directly write the MotionMask register (0xEC).
+    @param  mask  Bits to program into MotionMask (EnDClick, EnSwipe, etc.)
+*/
+void CST816S::set_motion_mask(uint8_t mask)
+{
+  i2c_write(CST816S_ADDRESS, 0xEC, &mask, 1);
+}
+
+/*!
+    @brief  Directly write the IrqCtl register (0xFA).
+    @param  mask  Bits to program into IrqCtl (EnMotion, EnTouch, etc.)
+*/
+void CST816S::set_irq_control(uint8_t mask)
+{
+  i2c_write(CST816S_ADDRESS, 0xFA, &mask, 1);
 }
 
 /*!
@@ -90,15 +108,13 @@ void CST816S::enable_double_click(void)
 */
 void CST816S::enable_double_click_interrupt_only(void)
 {
-    // 1) Only enable double-tap in MotionMask (0xEC: EnDClick = bit0)
-    uint8_t motion_mask = 0x01;          // bit0 = EnDClick, all others = 0
-    i2c_write(CST816S_ADDRESS, 0xEC, &motion_mask, 1);
+  // 1) Only enable double-tap in MotionMask (0xEC: EnDClick = bit0)
+  set_motion_mask(0x01);   // EnDClick
 
-    // 2) Configure IrqCtl (0xFA) to only raise IRQ on EnMotion (bit4),
-    //    clearing EnTouch/EnChange/OnceWLP bits
-    uint8_t irq_ctl = 0x10;              // bit4 = EnMotion, bits[7:5,3:0] = 0
-    i2c_write(CST816S_ADDRESS, 0xFA, &irq_ctl, 1);
+  // 2) Configure IrqCtl (0xFA) to only raise IRQ on motion events (EnMotion = bit4)
+  set_irq_control(0x10);   // EnMotion
 }
+
 
 /*!
     @brief  Disable auto sleep mode
@@ -162,12 +178,6 @@ void CST816S::begin(int interrupt)
 
   attachInterrupt(_irq, std::bind(&CST816S::handleISR, this), interrupt);
 }
-
-void CST816S::attachUserInterrupt(std::function<void(void)> callback)
-{
-  userISR = callback;
-}
-
 
 /*!
     @brief  Attaches a user-defined callback function to be triggered on an interrupt event from the CST816S touch controller.
